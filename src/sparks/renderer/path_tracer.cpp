@@ -57,6 +57,49 @@ void PathTracer::SampleFromLight(glm::vec3 &lpos, glm::vec3 &lnorm, float &area)
   area = totalArea;
 }
 
+glm::vec3 PathTracer::HemisphereSample(float u, float v, glm::vec3 norm) {
+  glm::vec3 dir;
+  float r, phi;
+  u = 2.0f * u - 1.0f;
+  v = 2.0f * v - 1.0f;
+  if (u > -v) {
+    if (u > v) {
+      r = u;
+      phi = (PI / 4.0f) * (v / u);
+    }
+    else {
+      r = v;
+      phi = (PI / 4.0f) * (2.0f - (u / v));
+    }
+  }
+  else {
+    if (u < v) {
+      r = -u;
+      phi = (PI / 4.0f) * (4.0f + (v / u));
+    }
+    else {
+      r = -v;
+      if (v != 0.0f) {
+        phi = (PI / 4.0f) * (6.0f - (u / v));
+      }
+      else {
+        phi = 0.0f;
+      }
+    }
+  }
+  dir.x = r * glm::cos(phi);
+  dir.y = r * glm::sin(phi);
+  dir.z = glm::sqrt(1.0f - r * r);
+  glm::vec3 axis = glm::normalize(glm::vec3(-norm.y, norm.x, 0.0f));
+  float c = norm.z;
+  float s = glm::sqrt(1.0f - c * c);
+  glm::mat3 tm{c + axis.x * axis.x * (1.0f - c), axis.y * axis.x * (1.0f - c) + axis.z * s, axis.z * axis.x * (1.0f - c) - axis.y * s,
+              axis.x * axis.y * (1.0f - c) - axis.z * s, c + axis.y * axis.y * (1.0f - c), axis.z * axis.y * (1.0f - c) + axis.x * s,
+              axis.x * axis.z * (1.0f - c) + axis.y * s, axis.y * axis.z * (1.0f - c) - axis.x * s, c + axis.z * axis.z * (1.0f - c)};
+  glm::vec3 samp = tm * dir;
+  return samp;
+}
+
 
 glm::vec3 PathTracer::SampleRay(glm::vec3 origin,
                                 glm::vec3 direction,
@@ -64,38 +107,48 @@ glm::vec3 PathTracer::SampleRay(glm::vec3 origin,
                                 int y,
                                 int sample) {
   glm::vec3 throughput{1.0f};
-  glm::vec3 radiance{0.0f};
+  glm::vec3 radiance{0.5f};
   HitRecord hit_record;
   int max_bounce = render_settings_->num_bounces;
   float t0 = scene_->TraceRay(origin, direction, 1e-4f, 1e7f, &hit_record);
   if (t0 < 0.0f) {
-    return radiance;
-  }
-  if (scene_->GetEntity(hit_record.hit_entity_id).GetMaterial().material_type == 4) {
-    Material lmater = scene_->GetEntity(hit_record.hit_entity_id).GetMaterial();
-    radiance = lmater.emission * lmater.emission_strength / glm::dot(hit_record.position - origin, hit_record.position - origin);
+    radiance += throughput * scene_->GetEnvmapMajorColor();
     return radiance;
   }
   for (int i = 0; i < max_bounce; i++) {
+    glm::vec3 pos = hit_record.position, norm = hit_record.geometry_normal;
+    Material mater = scene_->GetEntity(hit_record.hit_entity_id).GetMaterial();
+    if (mater.material_type == 4) {
+      radiance += throughput * mater.emission * mater.emission_strength;
+      break;
+    }
+    glm::vec3 brdf = mater.albedo_color;
     //Constribution from the light source.
     glm::vec3 lpos, lnorm;
     float area;
     SampleFromLight(lpos, lnorm, area);
     if (area != 0.0f) {
-      glm::vec3 ldir = glm::normalize(lpos - origin);
+      glm::vec3 ldir = glm::normalize(lpos - pos), lrad;
       HitRecord lhit;
-      float lt = scene_->TraceRay(origin, ldir, 1e-4f, 1e7f, &lhit);
-      if (glm::length(origin + lt * ldir - lpos) < 0.1f) {
+      float lt = scene_->TraceRay(pos, ldir, 1e-4f, 1e7f, &lhit);
+      if (glm::length(pos + lt * ldir - lpos) < 0.1f) {
         Material lmater = scene_->GetEntity(lhit.hit_entity_id).GetMaterial();
-        glm::vec3 lrad = lmater.emission * lmater.emission_strength * area ;
+        lrad = lmater.emission * lmater.emission_strength * brdf * area / glm::dot(lpos - pos, lpos - pos) * glm::dot(norm, ldir);
       }
+      radiance += lrad * throughput;
     }
     //Constribution from other reflectors.
     float RRTest = uniform(rd);
     if (RRTest >= RRProb) {
       break;
     }
-
+    glm::vec3 ndir = HemisphereSample(uniform(rd), uniform(rd), norm);
+    float nt = scene_->TraceRay(pos, ndir, 1e-4f, 1e7f, &hit_record);
+    throughput *= brdf * 2.0f * PI * glm::dot(norm, ndir) / RRTest;
+    if (nt < 0.0f) {
+      radiance += throughput * scene_->GetEnvmapMajorColor();
+      break;
+    }
   }
   return radiance;
 }

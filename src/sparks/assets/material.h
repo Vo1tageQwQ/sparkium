@@ -21,18 +21,6 @@ struct Material {
   glm::vec3 emission{0.0f};
   float emission_strength{1.0f};
   float alpha{1.0f};
-  //Disney BRDF Material
-  float subsurface{0.0f};
-  float metallic{0.0f};
-  float specular{0.0f};
-  float specularTint{0.0f};
-  float roughness{0.0f};
-  float anisotropic{0.0f};
-  float sheen{0.0f};
-  float sheenTint{0.0f};
-  float clearcoat{0.0f};
-  float clearcoatGloss{0.0f};
-
   MaterialType material_type{MATERIAL_TYPE_LAMBERTIAN};
   float reserve[2]{};
   Material() = default;

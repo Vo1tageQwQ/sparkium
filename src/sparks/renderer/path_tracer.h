@@ -13,11 +13,13 @@ class PathTracer {
                                     int y,
                                     int sample);
   void SampleFromLight(glm::vec3 &lpos, glm::vec3 &lnorm, float &area); 
+  glm::vec3 HemisphereSample(float u, float v, glm::vec3 norm);
 
  private:
   const RendererSettings *render_settings_{};
   const Scene *scene_{};
   const float RRProb = 0.8f;
+  const float PI = 3.1415926535;
   std::uniform_real_distribution<float> uniform;
   std::mt19937 rd;
 };
