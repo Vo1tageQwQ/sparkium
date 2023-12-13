@@ -11,10 +11,14 @@ class PathTracer {
                                     glm::vec3 direction,
                                     int x,
                                     int y,
-                                    int sample) const;
+                                    int sample);
+  void SampleFromLight(glm::vec3 &lpos, glm::vec3 &lnorm, float &area); 
 
  private:
   const RendererSettings *render_settings_{};
   const Scene *scene_{};
+  const float RRProb = 0.8f;
+  std::uniform_real_distribution<float> uniform;
+  std::mt19937 rd;
 };
 }  // namespace sparks

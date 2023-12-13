@@ -77,6 +77,40 @@ AxisAlignedBoundingBox Mesh::GetAABB(const glm::mat4 &transform) const {
   return result;
 }
 
+void Mesh::TriangleHit(const glm::vec3 &origin, const glm::vec3 &direction, const Vertex &v0,
+                  const Vertex &v1, const Vertex &v2, float t_min, HitRecord *hit_record,
+                  float &result) const {
+  glm::vec3 e1 = v1.position - v0.position, e2 = v2.position - v0.position, s = origin - v0.position;
+  glm::vec3 s1 = glm::cross(direction, e2), s2 = glm::cross(s, e1);
+  if (glm::abs(glm::dot(s1, e1)) < 1e-9f) {
+    return;
+  }
+  auto T = glm::vec3(glm::dot(s2, e2), glm::dot(s1, s), glm::dot(s2, direction)) / glm::dot(s1, e1);
+  if (T.x < t_min || (result > 0.0f && T.x > result) || T.y < 0.0f || T.z < 0.0f || T.y + T.z > 1.0f) {
+    return;
+  }
+  result = T.x;
+  auto P = glm::vec3(1.0f - T.y - T.z, T.y, T.z);
+  auto position = origin + T.x * direction;
+  if (hit_record) {
+    hit_record->position = position;
+    hit_record->tex_coord = v0.tex_coord * P.x + v1.tex_coord * P.y + v2.tex_coord * P.z;
+    auto geometry_normal = glm::normalize(glm::cross(v2.position - v0.position, v1.position - v0.position));
+    if(glm::dot(geometry_normal, direction) < 0.0f) {
+      hit_record->front_face = true;
+      hit_record->geometry_normal = geometry_normal;
+      hit_record->normal = v0.normal * P.x + v1.normal * P.y + v2.normal * P.z;
+      hit_record->tangent = v0.tangent * P.x + v1.tangent * P.y + v2.tangent * P.z;
+    }
+    else {
+      hit_record->front_face = false;
+      hit_record->geometry_normal = -geometry_normal;
+      hit_record->normal = -(v0.normal * P.x + v1.normal * P.y + v2.normal * P.z);
+      hit_record->tangent = -(v0.tangent * P.x + v1.tangent * P.y + v2.tangent * P.z);
+    }
+  }
+}
+
 float Mesh::TraceRay(const glm::vec3 &origin,
                      const glm::vec3 &direction,
                      float t_min,
@@ -87,48 +121,7 @@ float Mesh::TraceRay(const glm::vec3 &origin,
     const auto &v0 = vertices_[indices_[i]];
     const auto &v1 = vertices_[indices_[j]];
     const auto &v2 = vertices_[indices_[k]];
-
-    glm::mat3 A = glm::mat3(v1.position - v0.position,
-                            v2.position - v0.position, -direction);
-    if (std::abs(glm::determinant(A)) < 1e-9f) {
-      continue;
-    }
-    A = glm::inverse(A);
-    auto uvt = A * (origin - v0.position);
-    auto &t = uvt.z;
-    if (t < t_min || (result > 0.0f && t > result)) {
-      continue;
-    }
-    auto &u = uvt.x;
-    auto &v = uvt.y;
-    auto w = 1.0f - u - v;
-    auto position = origin + t * direction;
-    if (u >= 0.0f && v >= 0.0f && u + v <= 1.0f) {
-      result = t;
-      if (hit_record) {
-        auto geometry_normal = glm::normalize(
-            glm::cross(v2.position - v0.position, v1.position - v0.position));
-        if (glm::dot(geometry_normal, direction) < 0.0f) {
-          hit_record->position = position;
-          hit_record->geometry_normal = geometry_normal;
-          hit_record->normal = v0.normal * w + v1.normal * u + v2.normal * v;
-          hit_record->tangent =
-              v0.tangent * w + v1.tangent * u + v2.tangent * v;
-          hit_record->tex_coord =
-              v0.tex_coord * w + v1.tex_coord * u + v2.tex_coord * v;
-          hit_record->front_face = true;
-        } else {
-          hit_record->position = position;
-          hit_record->geometry_normal = -geometry_normal;
-          hit_record->normal = -(v0.normal * w + v1.normal * u + v2.normal * v);
-          hit_record->tangent =
-              -(v0.tangent * w + v1.tangent * u + v2.tangent * v);
-          hit_record->tex_coord =
-              v0.tex_coord * w + v1.tex_coord * u + v2.tex_coord * v;
-          hit_record->front_face = false;
-        }
-      }
-    }
+    TriangleHit(origin, direction, v0, v1, v2, t_min, hit_record, result);
   }
   return result;
 }

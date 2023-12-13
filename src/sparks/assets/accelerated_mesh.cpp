@@ -20,6 +20,7 @@ float AcceleratedMesh::TraceRay(const glm::vec3 &origin,
   return Mesh::TraceRay(origin, direction, t_min, hit_record);
 }
 
+// TODO
 void AcceleratedMesh::BuildAccelerationStructure() {
 }
 
