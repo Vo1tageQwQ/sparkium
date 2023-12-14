@@ -18,8 +18,8 @@ class PathTracer {
  private:
   const RendererSettings *render_settings_{};
   const Scene *scene_{};
-  const float RRProb = 0.8f;
-  const float PI = 3.1415926535;
+  const float RRProb = 0.95f;
+  const float PI = 3.1415926535f;
   std::uniform_real_distribution<float> uniform;
   std::mt19937 rd;
 };

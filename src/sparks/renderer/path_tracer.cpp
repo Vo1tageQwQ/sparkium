@@ -53,7 +53,7 @@ void PathTracer::SampleFromLight(glm::vec3 &lpos, glm::vec3 &lnorm, float &area)
   glm::vec3 v[3];
   std::tie(v[0], v[1], v[2]) = triangles[target];
   lpos = (1.0f - glm::sqrt(r1)) * v[0] + (glm::sqrt(r1) * (1.0f - r2)) * v[1] + r2 * glm::sqrt(r1) * v[2];
-  lnorm = glm::normalize(glm::cross(v[2] - v[0], v[1] - v[0]));\
+  lnorm = glm::normalize(glm::cross(v[2] - v[0], v[1] - v[0]));
   area = totalArea;
 }
 
@@ -107,22 +107,40 @@ glm::vec3 PathTracer::SampleRay(glm::vec3 origin,
                                 int y,
                                 int sample) {
   glm::vec3 throughput{1.0f};
-  glm::vec3 radiance{0.5f};
+  glm::vec3 radiance{0.0f};
+  glm::vec3 pos = origin, dir = direction, norm;
+  float tt;
   HitRecord hit_record;
   int max_bounce = render_settings_->num_bounces;
-  float t0 = scene_->TraceRay(origin, direction, 1e-4f, 1e7f, &hit_record);
-  if (t0 < 0.0f) {
-    radiance += throughput * scene_->GetEnvmapMajorColor();
-    return radiance;
-  }
-  for (int i = 0; i < max_bounce; i++) {
-    glm::vec3 pos = hit_record.position, norm = hit_record.geometry_normal;
-    Material mater = scene_->GetEntity(hit_record.hit_entity_id).GetMaterial();
-    if (mater.material_type == 4) {
-      radiance += throughput * mater.emission * mater.emission_strength;
+  for (int i = 0; i <= max_bounce; i++) {
+    tt = scene_->TraceRay(pos, dir, 1e-4f, 1e7f, &hit_record);
+    if (tt < 0.0f) {
+      radiance += throughput * scene_->GetEnvmapMajorColor();
       break;
     }
+    Material mater = scene_->GetEntity(hit_record.hit_entity_id).GetMaterial();
     glm::vec3 brdf = mater.albedo_color;
+    pos = hit_record.position, norm = hit_record.geometry_normal;
+    pos += norm * 1e-3f;
+    if (mater.material_type == 4) {
+      const Entity &lentity = scene_->GetEntity(hit_record.hit_entity_id);
+      const std::vector<Vertex> vertices = lentity.GetModel()->GetVertices();
+      const std::vector<uint32_t> indices = lentity.GetModel()->GetIndices();
+      float lArea = 0.0f;
+      glm::mat4 transform = lentity.GetTransformMatrix();
+      for (int j = 0; j < indices.size(); j+=3) {
+        glm::vec4 v0(vertices[indices[j]].position, 1.0f);
+        glm::vec4 v1(vertices[indices[j + 1]].position, 1.0f);
+        glm::vec4 v2(vertices[indices[j + 2]].position, 1.0f);
+        glm::vec3 u0 = glm::vec3(transform * v0);
+        glm::vec3 u1 = glm::vec3(transform * v1);
+        glm::vec3 u2 = glm::vec3(transform * v2);
+        float deltaArea = glm::length(glm::cross(u2 - u0, u1 - u0)) / 2.0f;
+        lArea += deltaArea;
+      }
+      radiance += throughput * mater.emission * mater.emission_strength * lArea / (tt * tt);
+      break;
+    }
     //Constribution from the light source.
     glm::vec3 lpos, lnorm;
     float area;
@@ -131,25 +149,24 @@ glm::vec3 PathTracer::SampleRay(glm::vec3 origin,
       glm::vec3 ldir = glm::normalize(lpos - pos), lrad;
       HitRecord lhit;
       float lt = scene_->TraceRay(pos, ldir, 1e-4f, 1e7f, &lhit);
-      if (glm::length(pos + lt * ldir - lpos) < 0.1f) {
+      if (lt > 0.0f || glm::length(pos + lt * ldir - lpos) < 0.1f) {
         Material lmater = scene_->GetEntity(lhit.hit_entity_id).GetMaterial();
-        lrad = lmater.emission * lmater.emission_strength * brdf * area / glm::dot(lpos - pos, lpos - pos) * glm::dot(norm, ldir);
+        lrad = lmater.emission * lmater.emission_strength * brdf * area * glm::dot(norm, ldir) * glm::dot(-lnorm, ldir) / (lt * lt);
       }
       radiance += lrad * throughput;
     }
     //Constribution from other reflectors.
     float RRTest = uniform(rd);
-    if (RRTest >= RRProb) {
+    if (RRTest >= RRProb && i > 1) {
       break;
     }
-    glm::vec3 ndir = HemisphereSample(uniform(rd), uniform(rd), norm);
-    float nt = scene_->TraceRay(pos, ndir, 1e-4f, 1e7f, &hit_record);
-    throughput *= brdf * 2.0f * PI * glm::dot(norm, ndir) / RRTest;
-    if (nt < 0.0f) {
-      radiance += throughput * scene_->GetEnvmapMajorColor();
-      break;
+    dir = HemisphereSample(uniform(rd), uniform(rd), norm);
+    if (glm::dot(dir, norm) < 0.0f) {
+      dir = -dir;
     }
+    throughput *= brdf * 2.0f * PI * glm::dot(norm, dir) / RRTest;
   }
+  radiance = glm::clamp(radiance, glm::vec3{0.0f}, glm::vec3{1.0f});
   return radiance;
 }
 }  // namespace sparks
