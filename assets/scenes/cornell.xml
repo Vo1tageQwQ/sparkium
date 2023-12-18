@@ -78,6 +78,8 @@
         <index value="3"/>
         <index value="2"/>
 
+        <transform type="rotate" angle="0.001" axis="0.0 1.0 0.0"/>
+
         <material type="lambertian">
             <albedo value="0.8 0.8 0.8"/>
         </material>

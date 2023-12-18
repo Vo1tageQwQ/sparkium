@@ -27,4 +27,5 @@ struct Material {
   explicit Material(const glm::vec3 &albedo);
   Material(Scene *scene, const tinyxml2::XMLElement *material_element);
 };
+
 }  // namespace sparks

@@ -32,8 +32,13 @@ class Mesh : public Model {
  protected:
   std::vector<Vertex> vertices_;
   std::vector<uint32_t> indices_;
-  void TriangleHit(const glm::vec3 &origin, const glm::vec3 &direction, const Vertex &v0,
-                  const Vertex &v1, const Vertex &v2, float t_min, HitRecord *hit_record,
-                  float &result) const;
+  void TriangleHit(const glm::vec3 &origin,
+                   const glm::vec3 &direction,
+                   const Vertex &v0,
+                   const Vertex &v1,
+                   const Vertex &v2,
+                   float t_min,
+                   HitRecord *hit_record,
+                   float &result) const;
 };
 }  // namespace sparks

@@ -11,16 +11,19 @@ class PathTracer {
                                     glm::vec3 direction,
                                     int x,
                                     int y,
-                                    int sample);
-  void SampleFromLight(glm::vec3 &lpos, glm::vec3 &lnorm, float &area); 
-  glm::vec3 HemisphereSample(float u, float v, glm::vec3 norm);
+                                    int sample) const;
+  void SampleFromLight(glm::vec3 &lpos, glm::vec3 &lnorm, float &area) const; 
+  glm::vec3 HemisphereSample(float u, float v, glm::vec3 norm) const;
 
  private:
   const RendererSettings *render_settings_{};
   const Scene *scene_{};
-  const float RRProb = 0.95f;
-  const float PI = 3.1415926535f;
-  std::uniform_real_distribution<float> uniform;
-  std::mt19937 rd;
+  static constexpr float RRProb = 0.95f;
+  mutable std::mt19937 rd;
+  
+  float random() const {
+    return std::uniform_real_distribution<float>(0.0f, 1.0f)(rd);
+  }
 };
+
 }  // namespace sparks

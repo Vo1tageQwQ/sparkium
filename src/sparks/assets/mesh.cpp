@@ -77,16 +77,25 @@ AxisAlignedBoundingBox Mesh::GetAABB(const glm::mat4 &transform) const {
   return result;
 }
 
-void Mesh::TriangleHit(const glm::vec3 &origin, const glm::vec3 &direction, const Vertex &v0,
-                  const Vertex &v1, const Vertex &v2, float t_min, HitRecord *hit_record,
-                  float &result) const {
-  glm::vec3 e1 = v1.position - v0.position, e2 = v2.position - v0.position, s = origin - v0.position;
-  glm::vec3 s1 = glm::cross(direction, e2), s2 = glm::cross(s, e1);
+void Mesh::TriangleHit(const glm::vec3 &origin,
+                       const glm::vec3 &direction,
+                       const Vertex &v0,
+                       const Vertex &v1,
+                       const Vertex &v2,
+                       float t_min,
+                       HitRecord *hit_record,
+                       float &result) const {
+  auto e1 = v1.position - v0.position, e2 = v2.position - v0.position,
+       s = origin - v0.position;
+  auto s1 = glm::cross(direction, e2), s2 = glm::cross(s, e1);
   if (glm::abs(glm::dot(s1, e1)) < 1e-9f) {
     return;
   }
-  auto T = glm::vec3(glm::dot(s2, e2), glm::dot(s1, s), glm::dot(s2, direction)) / glm::dot(s1, e1);
-  if (T.x < t_min || (result > 0.0f && T.x > result) || T.y < 0.0f || T.z < 0.0f || T.y + T.z > 1.0f) {
+  auto T =
+      glm::vec3(glm::dot(s2, e2), glm::dot(s1, s), glm::dot(s2, direction)) /
+      glm::dot(s1, e1);
+  if (T.x < t_min || (result > 0.0f && T.x > result) || T.y < 0.0f ||
+      T.z < 0.0f || T.y + T.z > 1.0f) {
     return;
   }
   result = T.x;
@@ -94,19 +103,23 @@ void Mesh::TriangleHit(const glm::vec3 &origin, const glm::vec3 &direction, cons
   auto position = origin + T.x * direction;
   if (hit_record) {
     hit_record->position = position;
-    hit_record->tex_coord = v0.tex_coord * P.x + v1.tex_coord * P.y + v2.tex_coord * P.z;
-    auto geometry_normal = glm::normalize(glm::cross(v2.position - v0.position, v1.position - v0.position));
-    if(glm::dot(geometry_normal, direction) < 0.0f) {
+    hit_record->tex_coord =
+        v0.tex_coord * P.x + v1.tex_coord * P.y + v2.tex_coord * P.z;
+    auto geometry_normal = glm::normalize(
+        glm::cross(v2.position - v0.position, v1.position - v0.position));
+    if (glm::dot(geometry_normal, direction) < 0.0f) {
       hit_record->front_face = true;
       hit_record->geometry_normal = geometry_normal;
       hit_record->normal = v0.normal * P.x + v1.normal * P.y + v2.normal * P.z;
-      hit_record->tangent = v0.tangent * P.x + v1.tangent * P.y + v2.tangent * P.z;
-    }
-    else {
+      hit_record->tangent =
+          v0.tangent * P.x + v1.tangent * P.y + v2.tangent * P.z;
+    } else {
       hit_record->front_face = false;
       hit_record->geometry_normal = -geometry_normal;
-      hit_record->normal = -(v0.normal * P.x + v1.normal * P.y + v2.normal * P.z);
-      hit_record->tangent = -(v0.tangent * P.x + v1.tangent * P.y + v2.tangent * P.z);
+      hit_record->normal =
+          -(v0.normal * P.x + v1.normal * P.y + v2.normal * P.z);
+      hit_record->tangent =
+          -(v0.tangent * P.x + v1.tangent * P.y + v2.tangent * P.z);
     }
   }
 }
