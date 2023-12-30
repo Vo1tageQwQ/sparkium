@@ -35,6 +35,7 @@ layout(binding = 9) uniform sampler2D[] texture_samplers;
 layout(location = 0) rayPayloadEXT RayPayload ray_payload;
 
 // clang-format off
+#include "brdf.glsl"
 #include "vertex.glsl"
 #include "hit_record.glsl"
 #include "random.glsl"
@@ -86,14 +87,20 @@ vec3 SampleRay(vec3 origin, vec3 direction) {
                       vec3(texture(texture_samplers[material.albedo_texture_id],
                                    hit_record.tex_coord));
         origin = hit_record.position;
-        direction = guo.envmap_light_direction;
-        radiance += throughput * guo.envmap_minor_color;
-        throughput *= max(dot(direction, hit_record.normal), 0.0) * 2.0;
-        TraceRay(origin, direction);
-        if (ray_payload.t < 0.0f) {
-          radiance += throughput * guo.envmap_major_color;
+        float eval, pdf;
+        SampleBRDF(hit_record.material_type, hit_record.normal, hit_record.geometry_normal, -direction, direction, eval, pdf);
+        if (pdf < EPS) {
+          break;
         }
-        break;
+        throughput *= hit_record.base_color * eval / pdf;
+
+        if (b > 2) {
+          float rrProb = max(max(throughput.x, throughput.y), throughput.z);
+          if (RandomFloat() > rrProb) {
+            break;
+          }
+          throughput /= rrProb;
+        }
       }
     }
   }
