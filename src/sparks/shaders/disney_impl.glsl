@@ -16,6 +16,8 @@
  *
  */
 
+// See https://github.com/wdas/brdf/blob/main/src/brdfs/disney.brdf for details.
+
 #ifndef SPARKIUM_DISNEY_IMPL_GLSL
 #define SPARKIUM_DISNEY_IMPL_GLSL
 
