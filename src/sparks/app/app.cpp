@@ -510,6 +510,28 @@ void App::UpdateImGui() {
           ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_Float);
       reset_accumulation_ |=
           scene.TextureCombo("Albedo Texture", &material.albedo_texture_id);
+
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Metallic", &material.metallic, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Subsurface", &material.subsurface, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Specular", &material.specular, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Roughness", &material.roughness, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Specular Tint", &material.specularTint, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Anisotropic", &material.anisotropic, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Sheen", &material.sheen, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Sheen Tint", &material.sheenTint, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Clearcoat", &material.clearcoat, 0.0f, 1.0f, "%.3f");
+      reset_accumulation_ |= ImGui::SliderFloat(
+          "Clearcoat Gloss", &material.clearcoatGloss, 0.0f, 1.0f, "%.3f");
+
       reset_accumulation_ |= ImGui::ColorEdit3(
           "Emission", &material.emission[0],
           ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_Float);
