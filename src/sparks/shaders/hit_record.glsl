@@ -1,6 +1,12 @@
 #ifndef SPARKIUM_HIT_RECORD_GLSL
 #define SPARKIUM_HIT_RECORD_GLSL
 
+#extension GL_GOOGLE_include_directive : require
+
+// clang-format off
+#include "disney.glsl"
+// clang-format on
+
 struct HitRecord {
   int hit_entity_id;
   vec3 position;
@@ -15,6 +21,8 @@ struct HitRecord {
   float emission_strength;
   float alpha;
   uint material_type;
+
+  DisneyParams disney_params;
 };
 
 #endif // SPARKIUM_HIT_RECORD_GLSL

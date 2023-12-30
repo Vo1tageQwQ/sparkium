@@ -5,6 +5,7 @@
 
 // clang-format off
 #include "constants.glsl"
+#include "disney_impl.glsl"
 #include "hit_record.glsl"
 #include "material.glsl"
 #include "random.glsl"
@@ -50,21 +51,34 @@ void SampleBRDFSpecular(vec3 normal, vec3 V, out vec3 L, out float eval, out flo
   }
 }
 
-void SampleBRDF(HitRecord hit_record, vec3 V, out vec3 L, out float eval, out float pdf) {
+void SampleBRDFPrincipled(vec3 normal, vec3 tangent, vec3 base_color, DisneyParams disney_params, vec3 V, out vec3 L, out vec3 eval, out float pdf) {
+  // TODO: Use importance sampling.
+  SampleCosineHemisphere(normal, L, pdf);
+  vec3 cotangent = cross(normal, tangent);
+  eval = BRDF_Disney(L, V, normal, tangent, cotangent, base_color, disney_params);
+}
+
+void SampleBRDF(HitRecord hit_record, vec3 V, out vec3 L, out vec3 eval, out float pdf) {
+  float brdf_value;
   switch (hit_record.material_type) {
     case MATERIAL_TYPE_LAMBERTIAN:
-      SampleBRDFLambertian(hit_record.normal, L, eval, pdf);
+      SampleBRDFLambertian(hit_record.normal, L, brdf_value, pdf);
+      eval = brdf_value * hit_record.base_color;
       break;
     case MATERIAL_TYPE_SPECULAR:
-      SampleBRDFSpecular(hit_record.normal, V, L, eval, pdf);
+      SampleBRDFSpecular(hit_record.normal, V, L, brdf_value, pdf);
+      eval = brdf_value * hit_record.base_color;
+      break;
+    case MATERIAL_TYPE_PRINCIPLED:
+      SampleBRDFPrincipled(hit_record.normal, hit_record.tangent, hit_record.base_color, hit_record.disney_params, V, L, eval, pdf);
       break;
     default:
-      eval = 0.0;
+      eval = vec3(0.0);
       pdf = 0.0;
       return;
   }
   if (dot(L, hit_record.geometry_normal) <= 0.0) {
-    eval = 0.0;
+    eval = vec3(0.0);
     pdf = 0.0;
   }
 }

@@ -40,6 +40,8 @@ HitRecord GetHitRecord(RayPayload ray_payload, vec3 origin, vec3 direction) {
   hit_record.alpha = mat.alpha;
   hit_record.material_type = mat.material_type;
 
+  hit_record.disney_params = mat.disney_params;
+
   if (dot(hit_record.geometry_normal, hit_record.normal) < 0.0) {
     hit_record.geometry_normal = -hit_record.geometry_normal;
   }

@@ -22,7 +22,18 @@ struct Material {
   float emission_strength{1.0f};
   float alpha{1.0f};
   MaterialType material_type{MATERIAL_TYPE_LAMBERTIAN};
-  float reserve[2]{};
+
+  float metallic{0.0f};
+  float subsurface{0.0f};
+  float specular{0.5f};
+  float roughness{0.5f};
+  float specularTint{0.0f};
+  float anisotropic{0.0f};
+  float sheen{0.0f};
+  float sheenTint{0.5f};
+  float clearcoat{0.0f};
+  float clearcoatGloss{1.0f};
+
   Material() = default;
   explicit Material(const glm::vec3 &albedo);
   Material(Scene *scene, const tinyxml2::XMLElement *material_element);

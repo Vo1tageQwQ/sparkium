@@ -88,12 +88,13 @@ vec3 SampleRay(vec3 origin, vec3 direction) {
                       vec3(texture(texture_samplers[material.albedo_texture_id],
                                    hit_record.tex_coord));
         origin = hit_record.position;
-        float eval, pdf;
+        vec3 eval;
+        float pdf;
         SampleBRDF(hit_record, -direction, direction, eval, pdf);
         if (pdf < EPS) {
           break;
         }
-        throughput *= hit_record.base_color * eval / pdf;
+        throughput *= eval / pdf;
 
         if (b > 2) {
           float rrProb = max(max(throughput.x, throughput.y), throughput.z);
