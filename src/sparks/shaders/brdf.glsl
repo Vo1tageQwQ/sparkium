@@ -5,6 +5,7 @@
 
 // clang-format off
 #include "constants.glsl"
+#include "hit_record.glsl"
 #include "material.glsl"
 #include "random.glsl"
 // clang-format on
@@ -49,20 +50,20 @@ void SampleBRDFSpecular(vec3 normal, vec3 V, out vec3 L, out float eval, out flo
   }
 }
 
-void SampleBRDF(uint material, vec3 normal, vec3 geo_normal, vec3 V, out vec3 L, out float eval, out float pdf) {
-  switch (material) {
+void SampleBRDF(HitRecord hit_record, vec3 V, out vec3 L, out float eval, out float pdf) {
+  switch (hit_record.material_type) {
     case MATERIAL_TYPE_LAMBERTIAN:
-      SampleBRDFLambertian(normal, L, eval, pdf);
+      SampleBRDFLambertian(hit_record.normal, L, eval, pdf);
       break;
     case MATERIAL_TYPE_SPECULAR:
-      SampleBRDFSpecular(normal, V, L, eval, pdf);
+      SampleBRDFSpecular(hit_record.normal, V, L, eval, pdf);
       break;
     default:
       eval = 0.0;
       pdf = 0.0;
       return;
   }
-  if (dot(L, geo_normal) <= 0.0) {
+  if (dot(L, hit_record.geometry_normal) <= 0.0) {
     eval = 0.0;
     pdf = 0.0;
   }

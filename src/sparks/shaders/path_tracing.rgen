@@ -38,6 +38,7 @@ layout(location = 0) rayPayloadEXT RayPayload ray_payload;
 #include "brdf.glsl"
 #include "vertex.glsl"
 #include "hit_record.glsl"
+#include "hit_record_impl.glsl"
 #include "random.glsl"
 // clang-format on
 
@@ -88,7 +89,7 @@ vec3 SampleRay(vec3 origin, vec3 direction) {
                                    hit_record.tex_coord));
         origin = hit_record.position;
         float eval, pdf;
-        SampleBRDF(hit_record.material_type, hit_record.normal, hit_record.geometry_normal, -direction, direction, eval, pdf);
+        SampleBRDF(hit_record, -direction, direction, eval, pdf);
         if (pdf < EPS) {
           break;
         }
