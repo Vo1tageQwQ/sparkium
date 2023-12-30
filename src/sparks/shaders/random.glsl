@@ -1,3 +1,11 @@
+#ifndef SPARKIUM_RANDOM_GLSL
+#define SPARKIUM_RANDOM_GLSL
+
+#extension GL_GOOGLE_include_directive : require
+
+// clang-format off
+#include "constants.glsl"
+// clang-format on
 
 struct RandomDevice {
   uint seed;
@@ -48,3 +56,5 @@ vec3 RandomOnSphere() {
 vec3 RandomInSphere() {
   return RandomOnSphere() * pow(RandomFloat(), 0.3333333333333333333);
 }
+
+#endif // SPARKIUM_RANDOM_GLSL

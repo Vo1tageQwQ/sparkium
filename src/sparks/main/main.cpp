@@ -12,7 +12,7 @@ ABSL_FLAG(bool,
           "Enable Vulkan validation layer");
 ABSL_FLAG(uint32_t, width, 1920, "Window width");
 ABSL_FLAG(uint32_t, height, 1080, "Window height");
-ABSL_FLAG(bool, vkrt, false, "Use Vulkan Ray Tracing pipeline");
+ABSL_FLAG(bool, vkrt, true, "Use Vulkan Ray Tracing pipeline");
 ABSL_FLAG(int, device, -1, "Select physical device manually");
 
 void RunApp(sparks::Renderer *renderer);

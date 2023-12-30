@@ -39,6 +39,57 @@ Material::Material(Scene *scene, const tinyxml2::XMLElement *material_element)
     }
   }
 
+  child_element = material_element->FirstChildElement("metallic");
+  if (child_element) {
+    metallic = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("subsurface");
+  if (child_element) {
+    subsurface = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("specular");
+  if (child_element) {
+    specular = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("roughness");
+  if (child_element) {
+    roughness = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("specular_tint");
+  if (child_element) {
+    specularTint = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("anisotropic");
+  if (child_element) {
+    anisotropic = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("sheen");
+  if (child_element) {
+    sheen = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("sheen_tint");
+  if (child_element) {
+    sheenTint = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("clearcoat");
+  if (child_element) {
+    clearcoat = std::stof(child_element->FindAttribute("value")->Value());
+  }
+
+  child_element = material_element->FirstChildElement("clearcoat_gloss");
+  if (child_element) {
+    clearcoatGloss =
+        std::stof(child_element->FindAttribute("value")->Value());
+  }
+
   child_element = material_element->FirstChildElement("emission");
   if (child_element) {
     emission = StringToVec3(child_element->FindAttribute("value")->Value());

@@ -35,8 +35,10 @@ layout(binding = 9) uniform sampler2D[] texture_samplers;
 layout(location = 0) rayPayloadEXT RayPayload ray_payload;
 
 // clang-format off
+#include "brdf.glsl"
 #include "vertex.glsl"
 #include "hit_record.glsl"
+#include "hit_record_impl.glsl"
 #include "random.glsl"
 // clang-format on
 
@@ -86,14 +88,21 @@ vec3 SampleRay(vec3 origin, vec3 direction) {
                       vec3(texture(texture_samplers[material.albedo_texture_id],
                                    hit_record.tex_coord));
         origin = hit_record.position;
-        direction = guo.envmap_light_direction;
-        radiance += throughput * guo.envmap_minor_color;
-        throughput *= max(dot(direction, hit_record.normal), 0.0) * 2.0;
-        TraceRay(origin, direction);
-        if (ray_payload.t < 0.0f) {
-          radiance += throughput * guo.envmap_major_color;
+        vec3 eval;
+        float pdf;
+        SampleBRDF(hit_record, -direction, direction, eval, pdf);
+        if (pdf < EPS) {
+          break;
         }
-        break;
+        throughput *= eval / pdf;
+
+        if (b > 2) {
+          float rrProb = max(max(throughput.x, throughput.y), throughput.z);
+          if (RandomFloat() > rrProb) {
+            break;
+          }
+          throughput /= rrProb;
+        }
       }
     }
   }
@@ -101,16 +110,20 @@ vec3 SampleRay(vec3 origin, vec3 direction) {
 }
 
 void main() {
-  const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
-  const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
-  vec2 d = inUV * 2.0 - 1.0;
+  const vec2 pixelStart = vec2(gl_LaunchIDEXT.xy);
 
   mat4 camera_to_world = inverse(guo.camera);
   mat4 screen_to_camera = inverse(guo.projection);
 
   for (int i = 0; i < guo.num_samples; i++) {
-    InitRandomSeed(uint(pixelCenter.x), uint(pixelCenter.y),
+    InitRandomSeed(uint(pixelStart.x), uint(pixelStart.y),
                    guo.accumulated_sample + i);
+
+    // Anti-aliasing
+    const vec2 pixelCenter = pixelStart + vec2(RandomFloat(), RandomFloat());
+    const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
+    vec2 d = inUV * 2.0 - 1.0;
+
     vec4 origin = camera_to_world * vec4(0, 0, 0, 1);
     vec4 target = screen_to_camera * vec4(d.x, d.y, 1, 1);
     vec4 direction = camera_to_world * vec4(normalize(target.xyz), 0);
