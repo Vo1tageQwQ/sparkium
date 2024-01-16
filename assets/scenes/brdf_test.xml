@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scene>
+	<camera>
+		<transform type="lookat">
+			<eye value="2.0 1.0 3.0"/>
+			<center value="0.0 0.0 0.0"/>
+			<up value="0.0 1.0 0.0"/>
+		</transform>
+	</camera>
+
+	<envmap type="file" value="../../textures/envmap_clouds_4k.hdr"/>
+
+	<model type="obj">
+		<filename value="../../meshes/plane.obj"/>
+		<transform type="world">
+            <scale value="10 1 10"/>
+            <translation value="0 0 0"/>
+            <rotation value="0 0 0"/>
+        </transform>
+
+		<material type="lambertian">
+			<albedo value="0.8 0.8 0.8"/>
+		</material>
+	</model>
+
+	<model type="obj">
+		<filename value="../../meshes/lp.obj"/>
+		<transform type="world">
+            <scale value="3 3 3"/>
+            <translation value="0.619 1.125 1.141"/>
+            <rotation value="0 -83.5 0"/>
+        </transform>
+
+		<material type="principled">
+			<albedo value="0.8 0.8 0.8"/>
+			<albedo_texture value="../../textures/m_BaseColor.png"/>
+			<metallic value="0"/>
+			<subsurface value="0.321"/>
+			<specular value="0.133"/>
+			<roughness value="0.810"/>
+			<specular_tint value="0"/>
+			<anisotropic value="0"/>
+			<sheen value="0.77"/>
+			<sheen_tint value="0.916"/>
+			<clearcoat value="0.826"/>
+			<clearcoat_gloss value="1"/>
+			<emission value="0.8 0.8 0.8"/>
+			<emission_strength value="0.0"/>
+			<alpha value="1.0"/>
+		</material>
+	</model>
+
+	<model type="obj">
+		<filename value="../../meshes/1.obj"/>
+		<transform type="world">
+            <scale value="1 1 1"/>
+            <translation value="2.63 0 -0.1"/>
+            <rotation value="0 -38.8 0"/>
+        </transform>
+
+		<material type="principled">
+			<albedo value="0.557 0.391 0.08"/>
+			<albedo_texture value="../../textures/pure_white.jpg"/>
+			<metallic value="0.755"/>
+			<subsurface value="0.652"/>
+			<specular value="0.896"/>
+			<roughness value="0.196"/>
+			<specular_tint value="0.709"/>
+			<anisotropic value="0.696"/>
+			<sheen value="0.0"/>
+			<sheen_tint value="0.0"/>
+			<clearcoat value="0.17"/>
+			<clearcoat_gloss value="0.71"/>
+			<emission value="0.8 0.8 0.8"/>
+			<emission_strength value="0.0"/>
+			<alpha value="1.0"/>
+		</material>
+	</model>
+
+	<model type="obj">
+		<filename value="../../meshes/Georg_C.obj"/>
+		<transform type="world">
+            <scale value="0.1 0.1 0.1"/>
+            <translation value="1.472 0 0"/>
+            <rotation value="0 -35.47 0"/>
+        </transform>
+
+		<material type="principled">
+			<albedo value="0.8 0.8 0.8"/>
+			<albedo_texture value="../../textures/Georg_C_Georg_O.png"/>
+			<metallic value="0.728"/>
+			<subsurface value="0.576"/>
+			<specular value="0.16"/>
+			<roughness value="0.84"/>
+			<specular_tint value="0"/>
+			<anisotropic value="0.351"/>
+			<sheen value="0.0"/>
+			<sheen_tint value="0.0"/>
+			<clearcoat value="0.182"/>
+			<clearcoat_gloss value="1"/>
+			<emission value="0.8 0.8 0.8"/>
+			<emission_strength value="0.0"/>
+			<alpha value="1.0"/>
+		</material>
+	</model>
+
+</scene>
