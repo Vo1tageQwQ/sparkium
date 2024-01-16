@@ -113,6 +113,13 @@ const glm::vec3 &Scene::GetCameraPitchYawRoll() const {
   return camera_pitch_yaw_roll_;
 }
 
+glm::vec3 &Scene::GetCameraVelocity() {
+  return camera_velocity_;
+}
+const glm::vec3 &Scene::GetCameraVelocity() const {
+  return camera_velocity_;
+}
+
 void Scene::UpdateEnvmapConfiguration() {
   const auto &scene = *this;
   auto envmap_id = scene.GetEnvmapId();

@@ -23,6 +23,8 @@ struct GlobalUniformObject {
   float clamp;
   float gamma;
   float aspect;
+
+  vec3 camera_velocity;
 };
 
 struct EntityUniformObject {

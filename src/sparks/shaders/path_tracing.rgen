@@ -149,6 +149,9 @@ void main() {
     target = vec3(camera_to_world * vec4(target, 1));
     vec3 direction = normalize(target - origin);
 
+    // Motion blur
+    origin += guo.camera_velocity * float(i) / float(guo.num_samples);
+
     imageStore(accumulation_color, ivec2(gl_LaunchIDEXT.xy),
                imageLoad(accumulation_color, ivec2(gl_LaunchIDEXT.xy)) +
                    vec4(SampleRay(origin, direction), 1.0));

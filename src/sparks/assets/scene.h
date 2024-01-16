@@ -50,6 +50,9 @@ class Scene {
   glm::vec3 &GetCameraPitchYawRoll();
   [[nodiscard]] const glm::vec3 &GetCameraPitchYawRoll() const;
 
+  glm::vec3 &GetCameraVelocity();
+  [[nodiscard]] const glm::vec3 &GetCameraVelocity() const;
+
   void Clear();
   void UpdateEnvmapConfiguration();
 
@@ -88,5 +91,7 @@ class Scene {
   float camera_speed_{3.0f};
   glm::vec3 camera_pitch_yaw_roll_{0.0f, 0.0f, 0.0f};
   Camera camera_{};
+
+  glm::vec3 camera_velocity_{0.0f};
 };
 }  // namespace sparks

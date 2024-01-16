@@ -484,6 +484,9 @@ void App::UpdateImGui() {
         "Yaw", &scene.GetCameraPitchYawRoll().y, 0.0f, 360.0f);
     reset_accumulation_ |= ImGui::SliderAngle(
         "Roll", &scene.GetCameraPitchYawRoll().z, -180.0f, 180.0f);
+    reset_accumulation_ |= ImGui::InputFloat3(
+        "Motion Blur Velocity",
+        reinterpret_cast<float *>(&scene.GetCameraVelocity()));
 
     ImGui::NewLine();
     ImGui::Text("Environment Map");
@@ -653,6 +656,8 @@ void App::UpdateDynamicBuffer() {
           0.1f, 30.0f);
   global_uniform_object.camera =
       glm::inverse(renderer_->GetScene().GetCameraToWorld());
+  global_uniform_object.camera_velocity =
+      renderer_->GetScene().GetCameraVelocity();
   global_uniform_object.envmap_id = renderer_->GetScene().GetEnvmapId();
   global_uniform_object.envmap_offset = renderer_->GetScene().GetEnvmapOffset();
   global_uniform_object.hover_id = hover_entity_id_;

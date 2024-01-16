@@ -21,5 +21,7 @@ struct GlobalUniformObject {
   float clamp{100.0f};
   float gamma{2.2f};
   float aspect{1.0f};
+  glm::vec3 camera_velocity{0.0f};
+  float padding{0.0f};
 };
 }  // namespace sparks
